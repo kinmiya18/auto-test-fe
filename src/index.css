@@ -1,68 +1,77 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  /* palette */
+  --accent: #4f6ef7;
+  --accent-hover: #3b5de7;
+  --bg: #0f1117;
+  --bg-card: #181a20;
+  --bg-input: #1e2028;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-focus: var(--accent);
+  --text: #e4e5ea;
+  --text-muted: #9ca0af;
+  --text-label: #c5c8d4;
+  --danger: #f0505e;
+  --danger-bg: rgba(240, 80, 94, 0.1);
+  --success: #34d399;
+  --radius: 10px;
+  --radius-sm: 8px;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --transition: 0.2s ease;
+
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.55;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color-scheme: dark;
+  color: var(--text);
+  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(160deg, #0f1117 0%, #161927 50%, #0f1117 100%);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 700;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+a {
+  color: var(--accent);
+  text-decoration: none;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+a:hover {
+  text-decoration: underline;
 }
 
+/* Light mode */
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --bg: #f0f2f5;
+    --bg-card: #ffffff;
+    --bg-input: #f5f6f8;
+    --border: rgba(0, 0, 0, 0.1);
+    --text: #1a1d2b;
+    --text-muted: #6b7280;
+    --text-label: #374151;
+    --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.08);
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+
+  body {
+    background: linear-gradient(160deg, #f0f2f5 0%, #e8ecf4 50%, #f0f2f5 100%);
   }
 }
