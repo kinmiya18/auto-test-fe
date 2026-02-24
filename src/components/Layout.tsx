@@ -14,6 +14,7 @@ export default function Layout() {
           </NavLink>
         </div>
       </nav>
+
       <main className="main-content">
         <Outlet />
       </main>

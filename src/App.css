@@ -448,6 +448,11 @@ td:last-child {
   font-size: 0.9rem;
 }
 
+.mb-sm  { margin-bottom: 8px; }
+.mt-md  { margin-top: 16px; }
+.mb-md  { margin-bottom: 12px; }
+.mt-lg  { margin-top: 24px; }
+
 .empty {
   text-align: center;
   padding: 40px 20px;
@@ -617,4 +622,139 @@ td:last-child {
     padding: 0 14px;
     gap: 16px;
   }
+}
+
+/* ── Test Result Panel ───────────────────────────────── */
+.test-result-panel {
+  margin-top: 8px;
+}
+
+/* Open file button */
+.btn-open-file {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(79, 110, 247, 0.25);
+  transition: background var(--transition), transform 0.1s ease, box-shadow var(--transition);
+  margin-bottom: 16px;
+}
+
+.btn-open-file:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 14px rgba(79, 110, 247, 0.35);
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: #fff;
+}
+
+/* Summary stats */
+.test-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.test-summary-item {
+  color: var(--text);
+}
+
+.test-summary-passed {
+  color: var(--success);
+}
+
+.test-summary-failed {
+  color: var(--danger);
+}
+
+.test-summary-none {
+  color: var(--text-muted);
+}
+
+/* Excel preview title */
+.excel-preview-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 12px;
+}
+
+/* Excel table wrapper */
+.excel-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: auto;
+  max-height: 480px;
+  box-shadow: var(--shadow-card);
+}
+
+.excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.excel-table thead th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #fff;
+  background: #4a6fa5;
+  border-bottom: 2px solid #3b5c8a;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+.excel-table thead th:last-child {
+  border-right: none;
+}
+
+.excel-table tbody td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: top;
+  max-width: 300px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.excel-table tbody td:last-child {
+  border-right: none;
+}
+
+.excel-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.excel-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Result cells */
+.cell-pass {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.cell-fail {
+  color: var(--danger);
+  font-weight: 700;
 }

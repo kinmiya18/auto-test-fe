@@ -1,11 +1,9 @@
 import './App.css'
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Layout from './Layout'
-import RunSessionPage from './RunSessionPage'
-import SessionsPage from './SessionsPage'
-import SessionDetailPage from './SessionDetailPage'
-import { RunSessionProvider } from './RunSessionContext'
+import { Layout } from './components'
+import { RunSessionPage, SessionsPage, SessionDetailPage } from './pages'
+import { RunSessionProvider } from './contexts/RunSessionContext'
 
 export default function App() {
   return (

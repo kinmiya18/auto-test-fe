@@ -1,16 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchSessions, type SessionSummary } from './api'
-
-const PAGE_SIZE = 20
-
-function fmtDate(d?: string) {
-  if (!d) return '—'
-  try { return new Date(d).toLocaleString() } catch { return d }
-}
+import { fetchSessions } from '../services'
+import { StatusBadge, Pagination } from '../components'
+import { formatDate } from '../utils'
+import { PAGE_SIZE } from '../constants'
+import type { SessionSummary } from '../types'
 
 export default function SessionsPage() {
   const navigate = useNavigate()
+
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
@@ -19,7 +17,8 @@ export default function SessionsPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-  const load = useCallback((p: number) => {
+  /* Fetch sessions for a given page */
+  function loadPage(p: number) {
     setLoading(true)
     setError(null)
     fetchSessions(p, PAGE_SIZE)
@@ -30,14 +29,23 @@ export default function SessionsPage() {
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Failed'))
       .finally(() => setLoading(false))
-  }, [])
+  }
 
-  useEffect(() => { load(0) }, [load]) // eslint-disable-line react-hooks/set-state-in-effect
+  /* Initial load — state defaults already match (loading=true, error=null) */
+  useEffect(() => {
+    fetchSessions(0, PAGE_SIZE)
+      .then((res) => {
+        setSessions(res.data)
+        setTotal(res.total)
+      })
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Failed'))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <div className="page">
       <div className="page-header">
-        <h1>Lịch sử test</h1>
+        <h1>Session History</h1>
         <p className="page-sub">All test sessions ordered by newest first</p>
       </div>
 
@@ -65,13 +73,18 @@ export default function SessionsPage() {
               <tbody>
                 {sessions.map((s) => (
                   <tr key={s.id}>
-                    <td><span className={`badge badge-${(s.status ?? 'unknown').toLowerCase()}`}>{s.status ?? '—'}</span></td>
+                    <td>
+                      <StatusBadge status={s.status} />
+                    </td>
                     <td>{s.scenarioName ?? '—'}</td>
                     <td>{s.profileName ?? '—'}</td>
-                    <td className="cell-date">{fmtDate(s.startedAt ?? s.createdAt)}</td>
-                    <td className="cell-date">{fmtDate(s.endedAt)}</td>
+                    <td className="cell-date">{formatDate(s.startedAt ?? s.createdAt)}</td>
+                    <td className="cell-date">{formatDate(s.endedAt)}</td>
                     <td>
-                      <button className="btn btn-sm btn-ghost" onClick={() => navigate(`/sessions/${s.id}`)}>
+                      <button
+                        className="btn btn-sm btn-ghost"
+                        onClick={() => navigate(`/sessions/${s.id}`)}
+                      >
                         Detail
                       </button>
                     </td>
@@ -81,18 +94,12 @@ export default function SessionsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="pagination">
-            <button className="btn btn-sm btn-ghost" disabled={page === 0} onClick={() => load(page - 1)}>
-              ← Prev
-            </button>
-            <span className="pagination-info">
-              Page {page + 1} / {totalPages} ({total} total)
-            </span>
-            <button className="btn btn-sm btn-ghost" disabled={page + 1 >= totalPages} onClick={() => load(page + 1)}>
-              Next →
-            </button>
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            onPageChange={loadPage}
+          />
         </>
       )}
     </div>
