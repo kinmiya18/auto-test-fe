@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchSessions, fetchProfiles } from '../services'
 import { StatusBadge, Pagination } from '../components'
-import { formatDate } from '../utils'
+import { formatDate, formatProfile } from '../utils'
 import { PAGE_SIZE } from '../constants'
 import type { Profile, SessionSummary } from '../types'
 
@@ -25,7 +25,7 @@ export default function SessionsPage() {
   }, [])
 
   const profileMap = useMemo(
-    () => new Map(profiles.map((p) => [p.id, p.name ?? p.browser ?? p.id])),
+    () => new Map(profiles.map((p) => [p.id, p])),
     [profiles],
   )
 
@@ -92,9 +92,12 @@ export default function SessionsPage() {
                     </td>
                     <td>{s.scenarioName ?? '—'}</td>
                     <td>
-                      {s.profileName
-                        ?? (s.profileId ? profileMap.get(s.profileId) : undefined)
-                        ?? '—'}
+                      {(() => {
+                        const p = s.profileId ? profileMap.get(s.profileId) : undefined
+                        if (p) return formatProfile(p)
+                        if (s.profileName) return s.profileName
+                        return '—'
+                      })()}
                     </td>
                     <td className="cell-date">{formatDate(s.startedAt ?? s.createdAt)}</td>
                     <td className="cell-date">{formatDate(s.endedAt)}</td>

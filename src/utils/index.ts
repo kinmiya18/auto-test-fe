@@ -1,3 +1,3 @@
-export { formatDate } from './format'
+export { formatDate, formatProfile } from './format'
 export { toViewableUrl } from './url'
 export { parseExcelFile, getSheetNames, type ParsedSheet } from './excel'

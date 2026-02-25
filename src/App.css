@@ -355,6 +355,74 @@ td:last-child {
   white-space: nowrap;
 }
 
+/* ── Table Logs (Session Detail) ─────────────────────── */
+.table-logs {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.table-logs th {
+  white-space: nowrap;
+}
+
+.table-logs td {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Column widths for logs table (percentage-based to fit viewport) */
+.table-logs th:nth-child(1),
+.table-logs td:nth-child(1) { width: 3%; }    /* # */
+.table-logs th:nth-child(2),
+.table-logs td:nth-child(2) { width: 15%; }   /* Action */
+.table-logs th:nth-child(3),
+.table-logs td:nth-child(3) { width: 8%; }    /* Duration */
+.table-logs th:nth-child(4),
+.table-logs td:nth-child(4) { width: 12%; }   /* Element */
+.table-logs th:nth-child(5),
+.table-logs td:nth-child(5) { width: 5%; }   /* Value */
+.table-logs th:nth-child(6),
+.table-logs td:nth-child(6) { width: 25%; }   /* Message */
+.table-logs th:nth-child(7),
+.table-logs td:nth-child(7) { width: 7%; }    /* Status */
+.table-logs th:nth-child(8),
+.table-logs td:nth-child(8) { width: 13%; }   /* Location */
+
+/* Action cell with screenshot link */
+.cell-action .action-link {
+  color: #e53935;
+  text-decoration: none;
+  cursor: pointer;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.cell-action .action-link:hover {
+  text-decoration: underline;
+}
+
+.cell-action .action-link code {
+  color: inherit;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.cell-location {
+  max-width: 200px;
+  word-break: break-all;
+}
+
+.cell-location a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cell-location a:hover {
+  text-decoration: underline;
+}
+
 .mono {
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 0.82rem;
@@ -395,7 +463,7 @@ td:last-child {
 .badge-failed,
 .badge-fail,
 .badge-error {
-  background: var(--danger-bg);
+  background: transparent;
   color: var(--danger);
 }
 

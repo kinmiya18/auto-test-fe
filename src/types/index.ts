@@ -48,12 +48,14 @@ export interface Log {
   id?: string
   no?: number
   action?: string
+  durationSeconds?: number
   element?: string
   value?: string
   message?: string
   status?: string
   createdAt?: string
   url?: string
+  page?: string
 }
 
 export interface SessionRunResult {

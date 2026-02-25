@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { fetchSessionById, fetchLogs, fetchProfiles } from '../services'
 import { StatusBadge } from '../components'
-import { formatDate, toViewableUrl } from '../utils'
+import { formatDate, toViewableUrl, formatProfile } from '../utils'
 import type { SessionDetail, Log, Profile } from '../types'
 
 export default function SessionDetailPage() {
@@ -11,7 +11,7 @@ export default function SessionDetailPage() {
 
   const [session, setSession] = useState<SessionDetail | null>(null)
   const [logs, setLogs] = useState<Log[]>([])
-  const [profileName, setProfileName] = useState<string | null>(null)
+  const [matchedProfile, setMatchedProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,12 +25,10 @@ export default function SessionDetailPage() {
         setSession(sess)
         setLogs(logList.filter((l) => l.no !== 0))
 
-        /* Resolve profile name from profileId */
+        /* Resolve profile from profileId */
         if (sess.profileId) {
           const match = profiles.find((p: Profile) => p.id === sess.profileId)
-          setProfileName(sess.profileName ?? match?.name ?? match?.browser ?? null)
-        } else {
-          setProfileName(sess.profileName ?? null)
+          setMatchedProfile(match ?? null)
         }
       })
       .catch((err: unknown) => {
@@ -90,7 +88,11 @@ export default function SessionDetailPage() {
         </div>
         <div className="detail-item">
           <span className="detail-label">Profile</span>
-          <span className="detail-value">{profileName ?? '—'}</span>
+          <span className="detail-value">
+            {matchedProfile
+              ? formatProfile(matchedProfile)
+              : (session.profileName ?? '—')}
+          </span>
         </div>
         <div className="detail-item">
           <span className="detail-label">Started</span>
@@ -114,21 +116,34 @@ export default function SessionDetailPage() {
               <tr>
                 <th>#</th>
                 <th>Action</th>
+                <th>Duration</th>
                 <th>Element</th>
                 <th>Value</th>
                 <th>Message</th>
                 <th>Status</th>
-                <th>URL</th>
-                <th>Time</th>
+                <th>Location</th>
               </tr>
             </thead>
             <tbody>
               {logs.map((log, idx) => (
                 <tr key={log.id ?? idx}>
                   <td>{log.no ?? idx + 1}</td>
-                  <td>
-                    <code>{log.action ?? '—'}</code>
+                  <td className="cell-action">
+                    {log.url ? (
+                      <a
+                        href={toViewableUrl(log.url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="action-link"
+                        title="Click to view screenshot"
+                      >
+                        <code>{log.action ?? '—'}</code>
+                      </a>
+                    ) : (
+                      <code>{log.action ?? '—'}</code>
+                    )}
                   </td>
+                  <td>{log.durationSeconds != null ? `${log.durationSeconds}s` : '—'}</td>
                   <td className="cell-element">
                     <code>{log.element ?? '—'}</code>
                   </td>
@@ -137,21 +152,15 @@ export default function SessionDetailPage() {
                   <td>
                     <StatusBadge status={log.status} />
                   </td>
-                  <td>
-                    {log.url ? (
-                      <a
-                        href={toViewableUrl(log.url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-sm btn-ghost"
-                      >
-                        🖼 View
+                  <td className="cell-location">
+                    {log.page ? (
+                      <a href={log.page} target="_blank" rel="noopener noreferrer">
+                        {log.page}
                       </a>
                     ) : (
                       '—'
                     )}
                   </td>
-                  <td className="cell-date">{formatDate(log.createdAt)}</td>
                 </tr>
               ))}
             </tbody>
