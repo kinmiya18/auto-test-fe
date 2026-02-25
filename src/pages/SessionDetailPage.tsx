@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { fetchSessionById, fetchLogs } from '../services'
+import { fetchSessionById, fetchLogs, fetchProfiles } from '../services'
 import { StatusBadge } from '../components'
 import { formatDate, toViewableUrl } from '../utils'
-import type { SessionDetail, Log } from '../types'
+import type { SessionDetail, Log, Profile } from '../types'
 
 export default function SessionDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -11,6 +11,7 @@ export default function SessionDetailPage() {
 
   const [session, setSession] = useState<SessionDetail | null>(null)
   const [logs, setLogs] = useState<Log[]>([])
+  const [profileName, setProfileName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -18,11 +19,19 @@ export default function SessionDetailPage() {
     if (!id) return
     let cancelled = false
 
-    Promise.all([fetchSessionById(id), fetchLogs(id)])
-      .then(([sess, logList]) => {
+    Promise.all([fetchSessionById(id), fetchLogs(id), fetchProfiles()])
+      .then(([sess, logList, profiles]) => {
         if (cancelled) return
         setSession(sess)
         setLogs(logList.filter((l) => l.no !== 0))
+
+        /* Resolve profile name from profileId */
+        if (sess.profileId) {
+          const match = profiles.find((p: Profile) => p.id === sess.profileId)
+          setProfileName(sess.profileName ?? match?.name ?? match?.browser ?? null)
+        } else {
+          setProfileName(sess.profileName ?? null)
+        }
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Failed')
@@ -80,6 +89,10 @@ export default function SessionDetailPage() {
           <StatusBadge status={session.status} />
         </div>
         <div className="detail-item">
+          <span className="detail-label">Profile</span>
+          <span className="detail-value">{profileName ?? '—'}</span>
+        </div>
+        <div className="detail-item">
           <span className="detail-label">Started</span>
           <span className="detail-value">{formatDate(session.startedAt ?? session.createdAt)}</span>
         </div>
@@ -95,7 +108,7 @@ export default function SessionDetailPage() {
       {logs.length === 0 ? (
         <div className="empty">No logs recorded for this session.</div>
       ) : (
-        <div className="table-wrap">
+        <div className="table-wrap table-wrap-scroll">
           <table className="table-logs">
             <thead>
               <tr>

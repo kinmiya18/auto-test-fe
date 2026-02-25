@@ -32,6 +32,7 @@ export interface SessionSummary {
   endedAt?: string
   createdAt?: string
   scenarioName?: string
+  profileId?: string
   profileName?: string
 }
 

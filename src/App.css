@@ -269,6 +269,21 @@ input[type='file']::file-selector-button:hover {
   overflow-x: auto;
 }
 
+.table-wrap-scroll {
+  overflow: auto;
+  max-height: 520px;
+}
+
+.table-wrap-scroll thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.table-wrap-scroll th {
+  background: var(--bg-card);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

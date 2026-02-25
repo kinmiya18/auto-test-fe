@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchSessions } from '../services'
+import { fetchSessions, fetchProfiles } from '../services'
 import { StatusBadge, Pagination } from '../components'
 import { formatDate } from '../utils'
 import { PAGE_SIZE } from '../constants'
-import type { SessionSummary } from '../types'
+import type { Profile, SessionSummary } from '../types'
 
 export default function SessionsPage() {
   const navigate = useNavigate()
@@ -14,6 +14,20 @@ export default function SessionsPage() {
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  /* ── Profiles lookup ─────────────────────────── */
+  const [profiles, setProfiles] = useState<Profile[]>([])
+
+  useEffect(() => {
+    fetchProfiles()
+      .then(setProfiles)
+      .catch(() => setProfiles([]))
+  }, [])
+
+  const profileMap = useMemo(
+    () => new Map(profiles.map((p) => [p.id, p.name ?? p.browser ?? p.id])),
+    [profiles],
+  )
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -77,7 +91,11 @@ export default function SessionsPage() {
                       <StatusBadge status={s.status} />
                     </td>
                     <td>{s.scenarioName ?? '—'}</td>
-                    <td>{s.profileName ?? '—'}</td>
+                    <td>
+                      {s.profileName
+                        ?? (s.profileId ? profileMap.get(s.profileId) : undefined)
+                        ?? '—'}
+                    </td>
                     <td className="cell-date">{formatDate(s.startedAt ?? s.createdAt)}</td>
                     <td className="cell-date">{formatDate(s.endedAt)}</td>
                     <td>
