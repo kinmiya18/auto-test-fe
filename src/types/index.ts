@@ -25,12 +25,18 @@ export interface Profile {
   networkLatencyMs?: number
 }
 
+export interface Scenario {
+  id: string
+  name?: string
+}
+
 export interface SessionSummary {
   id: string
   status?: string
   startedAt?: string
   endedAt?: string
   createdAt?: string
+  scenarioId?: string
   scenarioName?: string
   profileId?: string
   profileName?: string
