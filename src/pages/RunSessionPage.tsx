@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchProfiles } from '../services'
 import { useRunSession } from '../contexts/RunSessionContext'
@@ -22,8 +22,30 @@ export default function RunSessionPage() {
   /* ── Profiles ───────────────────────────────── */
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [profilesLoading, setProfilesLoading] = useState(true)
-  const [profileId, setProfileId] = useState('')
+  const [profileId, setProfileId] = useState('') 
+  const [profileSearch, setProfileSearch] = useState('')
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
 
+  function profileLabel(p: Profile) {
+    return `${p.name ? `${p.name} – ` : ''}${p.browser} – ${p.viewportWidth}×${p.viewportHeight}`
+  }
+
+  const filteredProfiles = useMemo(() => {
+    const q = profileSearch.toLowerCase()
+    return q ? profiles.filter((p) => profileLabel(p).toLowerCase().includes(q)) : profiles
+  }, [profiles, profileSearch])
+
+  /* Close dropdown when clicking outside */
+  useEffect(() => {
+    function onMouseDown(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
+  }, [])
   /* ── Run mode ───────────────────────────────── */
   const [mode, setMode] = useState<RunMode>('sequential')
   const showRows = mode === 'limited' || mode === 'limited-login'
@@ -78,7 +100,6 @@ export default function RunSessionPage() {
     fetchProfiles()
       .then((data) => {
         setProfiles(data)
-        if (data.length > 0) setProfileId(data[0].id)
       })
       .catch(() => setProfiles([]))
       .finally(() => setProfilesLoading(false))
@@ -185,24 +206,48 @@ export default function RunSessionPage() {
         <form onSubmit={handleSubmit}>
           <fieldset disabled={submitting} className="param-fields">
             {/* Profile */}
-            <div className="field">
+            <div className="field" ref={profileRef}>
               <label className="field-label">Profile:</label>
               {profilesLoading ? (
                 <span className="field-hint">Loading profiles…</span>
               ) : profiles.length === 0 ? (
                 <span className="field-hint field-hint-error">No profiles found</span>
               ) : (
-                <select
-                  className="field-input"
-                  value={profileId}
-                  onChange={(e) => setProfileId(e.target.value)}
-                >
-                  {profiles.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.browser} – {p.viewportWidth} × {p.viewportHeight}
-                    </option>
-                  ))}
-                </select>
+                <div className="profile-combobox">
+                  <input
+                    className="field-input"
+                    value={profileSearch}
+                    onChange={(e) => {
+                      setProfileSearch(e.target.value)
+                      setProfileOpen(true)
+                    }}
+                    onFocus={() => setProfileOpen(true)}
+                    placeholder="Search profile…"
+                    autoComplete="off"
+                  />
+                  {profileOpen && filteredProfiles.length > 0 && (
+                    <ul className="profile-dropdown">
+                      {filteredProfiles.map((p) => (
+                        <li
+                          key={p.id}
+                          className={`profile-option${p.id === profileId ? ' profile-option-active' : ''}`}
+                          onMouseDown={() => {
+                            setProfileId(p.id)
+                            setProfileSearch(profileLabel(p))
+                            setProfileOpen(false)
+                          }}
+                        >
+                          {profileLabel(p)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {profileOpen && filteredProfiles.length === 0 && (
+                    <ul className="profile-dropdown">
+                      <li className="profile-option profile-option-empty">No results</li>
+                    </ul>
+                  )}
+                </div>
               )}
             </div>
 
@@ -264,7 +309,7 @@ export default function RunSessionPage() {
                 type="button"
                 className="btn btn-ghost"
                 disabled={submitting}
-                onClick={() => navigate('/sessions')}
+                onClick={() => navigate('/history')}
               >
                 Session History
               </button>

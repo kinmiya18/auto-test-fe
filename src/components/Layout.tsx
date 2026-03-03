@@ -6,10 +6,10 @@ export default function Layout() {
       <nav className="navbar">
         <div className="navbar-brand">Autotest</div>
         <div className="navbar-links">
-          <NavLink to="/run" className={({ isActive }) => (isActive ? 'active' : '')}>
+          <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')} end>
             Run
           </NavLink>
-          <NavLink to="/sessions" className={({ isActive }) => (isActive ? 'active' : '')}>
+          <NavLink to="/history" className={({ isActive }) => (isActive ? 'active' : '')}>
             Sessions
           </NavLink>
         </div>

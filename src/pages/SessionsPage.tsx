@@ -104,7 +104,7 @@ export default function SessionsPage() {
                     <td>
                       <button
                         className="btn btn-sm btn-ghost"
-                        onClick={() => navigate(`/sessions/${s.id}`)}
+                        onClick={() => navigate(`/history/${s.id}`)}
                       >
                         Detail
                       </button>

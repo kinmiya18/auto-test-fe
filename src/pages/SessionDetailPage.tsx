@@ -74,7 +74,7 @@ export default function SessionDetailPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <button className="btn btn-sm btn-ghost mb-sm" onClick={() => navigate('/sessions')}>
+        <button className="btn btn-sm btn-ghost mb-sm" onClick={() => navigate('/history')}>
           ← Back
         </button>
         <h1>Session Detail</h1>

@@ -11,11 +11,10 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
-            <Route index element={<Navigate to="/run" replace />} />
-            <Route path="run" element={<RunSessionPage />} />
-            <Route path="sessions" element={<SessionsPage />} />
-            <Route path="sessions/:id" element={<SessionDetailPage />} />
-            <Route path="*" element={<Navigate to="/run" replace />} />
+            <Route index element={<RunSessionPage />} />
+            <Route path="history" element={<SessionsPage />} />
+            <Route path="history/:id" element={<SessionDetailPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
