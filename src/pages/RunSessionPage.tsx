@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { fetchProfiles } from '../services'
 import { useRunSession } from '../contexts/RunSessionContext'
 import { LogConsole, TestResultPanel, ExcelPreview } from '../components'
-import { RUN_MODES, FILE_FIELDS, type RunMode } from '../constants'
-import { parseExcelFile, type ParsedSheet } from '../utils'
+import { RUN_MODES, FILE_FIELDS } from '../constants'
+import type { ParsedSheet } from '../utils'
 import type { Profile } from '../types'
 
 /** Columns that get filled by the test runner */
@@ -12,18 +12,23 @@ const RESULT_COLUMNS = ['resultTestAuto', 'messageAuto'] as const
 
 export default function RunSessionPage() {
   const navigate = useNavigate()
-  const { submitting, logs, testResults, startRun, clearLogs } = useRunSession()
+  const {
+    submitting, logs, testResults, startRun,
+    mode, setMode,
+    files, handleFileChange,
+    sheetName, handleSheetNameChange,
+    startRow, setStartRow,
+    endRow, setEndRow,
+    profileId, setProfileId,
+    profileSearch, setProfileSearch,
+    dataPreview, previewError,
+  } = useRunSession()
 
-  /* Clear previous session results when navigating back to this page */
-  useEffect(() => {
-    clearLogs()
-  }, [clearLogs])
+  const showRows = mode === 'limited' || mode === 'limited-login'
 
-  /* ── Profiles ───────────────────────────────── */
+  /* ── Profiles (local UI state) ──────────────── */
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [profilesLoading, setProfilesLoading] = useState(true)
-  const [profileId, setProfileId] = useState('') 
-  const [profileSearch, setProfileSearch] = useState('')
   const [profileOpen, setProfileOpen] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
 
@@ -46,21 +51,8 @@ export default function RunSessionPage() {
     document.addEventListener('mousedown', onMouseDown)
     return () => document.removeEventListener('mousedown', onMouseDown)
   }, [])
-  /* ── Run mode ───────────────────────────────── */
-  const [mode, setMode] = useState<RunMode>('sequential')
-  const showRows = mode === 'limited' || mode === 'limited-login'
 
-  /* ── Form fields ────────────────────────────── */
-  const [files, setFiles] = useState<Record<string, File | null>>(
-    Object.fromEntries(FILE_FIELDS.map((f) => [f.key, null])),
-  )
-  const [sheetName, setSheetName] = useState('')
-  const [startRow, setStartRow] = useState('')
-  const [endRow, setEndRow] = useState('')
-
-  /* ── Data file preview ──────────────────────── */
-  const [dataPreview, setDataPreview] = useState<ParsedSheet | null>(null)
-  const [previewError, setPreviewError] = useState<string | null>(null)
+  /* ── Merged preview ─────────────────────────── */
 
   /**
    * Merge uploaded Excel rows with test results from the API.
@@ -106,46 +98,6 @@ export default function RunSessionPage() {
   }, [])
 
   /* ── Handlers ───────────────────────────────── */
-
-  function handleFileChange(key: string, file: File | null) {
-    setFiles((prev) => ({ ...prev, [key]: file }))
-
-    /* Parse data file immediately for preview */
-    if (key === 'dataTestFile') {
-      if (!file) {
-        setDataPreview(null)
-        setPreviewError(null)
-        return
-      }
-      parseExcelFile(file, sheetName.trim() || undefined)
-        .then((parsed) => {
-          setDataPreview(parsed)
-          setPreviewError(null)
-        })
-        .catch(() => {
-          setDataPreview(null)
-          setPreviewError('Cannot read Excel file')
-        })
-    }
-  }
-
-  /** Re-parse when sheet name changes (debounced via user input) */
-  function handleSheetNameChange(value: string) {
-    setSheetName(value)
-
-    const dataFile = files['dataTestFile']
-    if (!dataFile) return
-
-    parseExcelFile(dataFile, value.trim() || undefined)
-      .then((parsed) => {
-        setDataPreview(parsed)
-        setPreviewError(null)
-      })
-      .catch(() => {
-        setDataPreview(null)
-        setPreviewError('Cannot read Excel file')
-      })
-  }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -255,11 +207,23 @@ export default function RunSessionPage() {
             {FILE_FIELDS.map((f) => (
               <div className="field" key={f.key}>
                 <label className="field-label">{f.label}:</label>
-                <input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={(e) => handleFileChange(f.key, e.target.files?.[0] ?? null)}
-                />
+                {files[f.key] ? (
+                  <span className="file-chip">
+                    <span className="file-chip-name">{files[f.key]!.name}</span>
+                    <button
+                      type="button"
+                      className="file-chip-remove"
+                      onClick={() => handleFileChange(f.key, null)}
+                      title="Xoá file"
+                    >×</button>
+                  </span>
+                ) : (
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={(e) => handleFileChange(f.key, e.target.files?.[0] ?? null)}
+                  />
+                )}
               </div>
             ))}
 

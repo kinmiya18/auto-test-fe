@@ -1,15 +1,38 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 import { runSession } from '../services'
 import type { ApiResponse, RunSessionResult, TestResultData } from '../types'
+import type { RunMode } from '../constants'
+import { FILE_FIELDS } from '../constants'
+import { parseExcelFile, type ParsedSheet } from '../utils'
 
 /* ── Context shape ────────────────────────────────────── */
 
 export interface RunSessionState {
+  /* run state */
   submitting: boolean
   logs: string[]
   testResults: TestResultData | null
   startRun: (form: FormData) => void
   clearLogs: () => void
+
+  /* form state (persisted across navigation) */
+  mode: RunMode
+  setMode: (m: RunMode) => void
+  files: Record<string, File | null>
+  handleFileChange: (key: string, file: File | null) => void
+  sheetName: string
+  setSheetName: (v: string) => void
+  handleSheetNameChange: (v: string) => void
+  startRow: string
+  setStartRow: (v: string) => void
+  endRow: string
+  setEndRow: (v: string) => void
+  profileId: string
+  setProfileId: (v: string) => void
+  profileSearch: string
+  setProfileSearch: (v: string) => void
+  dataPreview: ParsedSheet | null
+  previewError: string | null
 }
 
 const RunSessionCtx = createContext<RunSessionState | null>(null)
@@ -48,10 +71,24 @@ function extractTestResults(data: RunSessionResult): TestResultData | null {
 /* ── Provider ─────────────────────────────────────────── */
 
 export function RunSessionProvider({ children }: { children: ReactNode }) {
+  /* Run state */
   const [submitting, setSubmitting] = useState(false)
   const [logs, setLogs] = useState<string[]>([])
   const [testResults, setTestResults] = useState<TestResultData | null>(null)
   const runningRef = useRef(false)
+
+  /* Form state (preserved across navigation) */
+  const [mode, setMode] = useState<RunMode>('sequential')
+  const [files, setFiles] = useState<Record<string, File | null>>(
+    Object.fromEntries(FILE_FIELDS.map((f) => [f.key, null])),
+  )
+  const [sheetName, setSheetName] = useState('')
+  const [startRow, setStartRow] = useState('')
+  const [endRow, setEndRow] = useState('')
+  const [profileId, setProfileId] = useState('')
+  const [profileSearch, setProfileSearch] = useState('')
+  const [dataPreview, setDataPreview] = useState<ParsedSheet | null>(null)
+  const [previewError, setPreviewError] = useState<string | null>(null)
 
   const pushLog = useCallback((msg: string) => {
     setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`])
@@ -98,8 +135,62 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
     setTestResults(null)
   }, [])
 
+  /* File change handler */
+  const handleFileChange = useCallback((key: string, file: File | null) => {
+    setFiles((prev) => ({ ...prev, [key]: file }))
+
+    if (key === 'dataTestFile') {
+      if (!file) {
+        setDataPreview(null)
+        setPreviewError(null)
+        return
+      }
+      parseExcelFile(file)
+        .then((parsed) => {
+          setDataPreview(parsed)
+          setPreviewError(null)
+        })
+        .catch(() => {
+          setDataPreview(null)
+          setPreviewError('Cannot read Excel file')
+        })
+    }
+  }, [])
+
+  /* Sheet name change handler */
+  const handleSheetNameChange = useCallback((value: string) => {
+    setSheetName(value)
+
+    setFiles((prev) => {
+      const dataFile = prev['dataTestFile']
+      if (!dataFile) return prev
+
+      parseExcelFile(dataFile, value.trim() || undefined)
+        .then((parsed) => {
+          setDataPreview(parsed)
+          setPreviewError(null)
+        })
+        .catch(() => {
+          setDataPreview(null)
+          setPreviewError('Cannot read Excel file')
+        })
+
+      return prev
+    })
+  }, [])
+
   return (
-    <RunSessionCtx value={{ submitting, logs, testResults, startRun, clearLogs }}>
+    <RunSessionCtx value={{
+      submitting, logs, testResults, startRun, clearLogs,
+      mode, setMode,
+      files, handleFileChange,
+      sheetName, setSheetName, handleSheetNameChange,
+      startRow, setStartRow,
+      endRow, setEndRow,
+      profileId, setProfileId,
+      profileSearch, setProfileSearch,
+      dataPreview, previewError,
+    }}>
       {children}
     </RunSessionCtx>
   )

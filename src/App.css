@@ -889,3 +889,38 @@ td:last-child {
   color: var(--danger);
   font-weight: 700;
 }
+
+/* File chip (selected file indicator) */
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.file-chip-name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-chip-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.file-chip-remove:hover {
+  color: var(--danger);
+}
