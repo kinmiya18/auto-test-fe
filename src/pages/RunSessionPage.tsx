@@ -30,6 +30,7 @@ export default function RunSessionPage() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [profilesLoading, setProfilesLoading] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const profileRef = useRef<HTMLDivElement>(null)
 
   function profileLabel(p: Profile) {
@@ -101,13 +102,20 @@ export default function RunSessionPage() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!profileId) return
 
-    const missingFiles = FILE_FIELDS.filter((f) => !files[f.key])
-    if (missingFiles.length > 0) return
-
+    const errors: Record<string, string> = {}
+    if (!profileId) errors['profile'] = 'Vui lòng chọn Profile'
+    for (const f of FILE_FIELDS) {
+      if (!files[f.key]) errors[f.key] = `Vui lòng chọn ${f.label.replace('Upload ', '')}`
+    }
     const trimmedSheet = sheetName.trim()
-    if (!trimmedSheet) return
+    if (!trimmedSheet) errors['sheetName'] = 'Vui lòng nhập Sheet Data'
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+    setValidationErrors({})
 
     const form = new FormData()
     form.append('profileId', profileId)
@@ -158,7 +166,7 @@ export default function RunSessionPage() {
         <form onSubmit={handleSubmit}>
           <fieldset disabled={submitting} className="param-fields">
             {/* Profile */}
-            <div className="field" ref={profileRef}>
+            <div className={`field${validationErrors['profile'] ? ' field-error' : ''}`} data-error={validationErrors['profile'] || ''} ref={profileRef}>
               <label className="field-label">Profile:</label>
               {profilesLoading ? (
                 <span className="field-hint">Loading profiles…</span>
@@ -171,6 +179,7 @@ export default function RunSessionPage() {
                     value={profileSearch}
                     onChange={(e) => {
                       setProfileSearch(e.target.value)
+                      setProfileId('')
                       setProfileOpen(true)
                     }}
                     onFocus={() => setProfileOpen(true)}
@@ -205,7 +214,7 @@ export default function RunSessionPage() {
 
             {/* File uploads */}
             {FILE_FIELDS.map((f) => (
-              <div className="field" key={f.key}>
+              <div className={`field${validationErrors[f.key] ? ' field-error' : ''}`} key={f.key} data-error={validationErrors[f.key] || ''}>
                 <label className="field-label">{f.label}:</label>
                 {files[f.key] ? (
                   <span className="file-chip">
@@ -228,7 +237,7 @@ export default function RunSessionPage() {
             ))}
 
             {/* Sheet name */}
-            <div className="field">
+            <div className={`field${validationErrors['sheetName'] ? ' field-error' : ''}`} data-error={validationErrors['sheetName'] || ''}>
               <label className="field-label">Sheet Data:</label>
               <input
                 className="field-input"

@@ -924,3 +924,24 @@ td:last-child {
 .file-chip-remove:hover {
   color: var(--danger);
 }
+
+/* Field validation error */
+.field-error .field-label {
+  color: var(--danger);
+}
+
+.field-error .field-input {
+  border-color: var(--danger);
+}
+
+.field-error .file-chip {
+  border-color: var(--danger);
+}
+
+.field-error::after {
+  content: attr(data-error);
+  display: block;
+  color: var(--danger);
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
